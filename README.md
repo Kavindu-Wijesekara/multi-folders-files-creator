@@ -1,71 +1,101 @@
-# multi-folders-files-creator README
+# Multi Folders & Files Creator
 
-This is the README for your extension "multi-folders-files-creator". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension that allows you to create multiple folders and files at once with a simple syntax.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Create multiple files and folders with a single command
+- Automatically create parent directories if they don't exist
+- Use file templates based on file extensions
+- Customize the separator character and other settings
+- Support for status reporting and error handling
 
-For example if there is an image subfolder under your extension project workspace:
+### How It Works
 
-\!\[feature X\]\(images/feature-x.png\)
+Right-click on any folder in the explorer and select "Create Multiple Folders or Files":
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Context Menu](https://raw.githubusercontent.com/Kavindu-Wijesekara/multi-folders-files-creator/main/images/context-menu.png)
 
-## Requirements
+Enter the paths separated by semicolons (or your custom separator):
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+![Input Box](https://raw.githubusercontent.com/Kavindu-Wijesekara/multi-folders-files-creator/main/images/input-box.png)
+
+All files and folders are created instantly:
+
+![Result](https://raw.githubusercontent.com/Kavindu-Wijesekara/multi-folders-files-creator/main/images/result.png)
+
+## Usage
+
+1. Right-click on a folder in the Explorer panel
+2. Select "Create Multiple Folders or Files" from the context menu
+3. Enter the paths you want to create, separated by semicolons (by default)
+   - End paths with `/` to create folders
+   - Paths without `/` at the end will create files
+   - Nested paths will automatically create parent directories
+
+### Examples
+
+```
+src/components/Button.js;src/components/Header.js;src/styles/main.css
+```
+Creates three files: Button.js, Header.js, and main.css, with their respective parent directories.
+
+```
+src/utils/;src/components/;src/assets/images/
+```
+Creates three folders: utils, components, and images (with its parent directory assets).
+
+```
+models/User.js;models/Product.js;controllers/
+```
+Creates two files (User.js and Product.js) and one folder (controllers).
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `multiFoldersFilesCreator.separator`: Character used to separate multiple file/folder paths (default: `;`)
+* `multiFoldersFilesCreator.defaultTemplate`: Default content for new files without a specific template (default: empty)
+* `multiFoldersFilesCreator.confirmLargeOperations`: Show a confirmation dialog when creating many files/folders at once (default: `true`)
+* `multiFoldersFilesCreator.largeOperationThreshold`: Number of files/folders that triggers the confirmation dialog (default: `5`)
 
-## Known Issues
+## Supported File Templates
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+The extension automatically adds templates for these file types:
+
+- `.ts` - TypeScript files
+- `.js` - JavaScript files
+- `.html` - HTML files
+- `.css` - CSS files
+- `.json` - JSON files
+- `.md` - Markdown files
+- `.py` - Python files
+- `.java` - Java files
+- `.c` - C files
+- `.cpp` - C++ files
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+- Initial release
+- Basic functionality to create multiple files and folders
+- File templates for common file types
+- Configuration options for customization
+- Status reporting and error handling
 
-Initial release of ...
+## Upcoming Features
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+- Custom templates for different file types
+- Ability to save and reuse common file structures
+- Command palette support
+- Support for workspace-specific templates
+- Preview mode to see what will be created before confirming
 
 ---
 
-## Following extension guidelines
+## Contributing
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Feel free to open issues or PRs on the [GitHub repository](https://github.com/Kavindu-Wijesekara/multi-folders-files-creator).
 
 **Enjoy!**

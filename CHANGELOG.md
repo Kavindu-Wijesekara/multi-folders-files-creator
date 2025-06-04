@@ -1,9 +1,13 @@
 # Change Log
 
-All notable changes to the "multi-folders-files-creator" extension will be documented in this file.
+All notable changes to the "Multi Folders & Files Creator" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [0.0.1] - 2025-06-04
 
-## [Unreleased]
-
-- Initial release
+### Added
+- Initial release of Multi Folders & Files Creator
+- Feature to create multiple files and folders at once
+- Support for file templates based on file extensions
+- Configuration options for customization
+- Error handling and status reporting
+- Confirmation dialog for large operations

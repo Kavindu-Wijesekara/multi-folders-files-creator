@@ -9,3 +9,15 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+node_modules/**
+.github/**
+.git/**
+**/.DS_Store
+**/thumbs.db
+images/raw/**
+**/*.vsix
+.editorconfig
+.eslintrc.json
+webpack.config.js
+.prettierrc
+.prettierignore

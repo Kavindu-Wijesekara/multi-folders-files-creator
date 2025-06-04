@@ -1,32 +1,74 @@
 {
   "name": "multi-folders-files-creator",
-  "displayName": "multi-folders-files-creator",
-  "description": "",
+  "displayName": "Multi Folders & Files Creator",
+  "description": "Create multiple folders and files at once with a simple syntax",
   "version": "0.0.1",
+  "publisher": "KavinduWijesekara",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kavindu-Wijesekara/multi-folders-files-creator.git"
+  },
   "engines": {
     "vscode": "^1.100.0"
   },
+  "keywords": [
+    "files",
+    "folders",
+    "create",
+    "multiple",
+    "generator",
+    "template",
+    "productivity"
+  ],
   "categories": [
-    "Other"
+    "Other",
+    "Snippets",
+    "Formatters"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-  "commands": [
-    {
-      "command": "extension.createMultiple",
-      "title": "Create Multiple Folders or Files"
-    }
-  ],
-  "menus": {
-    "explorer/context": [
+    "commands": [
       {
         "command": "extension.createMultiple",
-        "when": "explorerResourceIsFolder",
-        "group": "navigation"
+        "title": "Create Multiple Folders or Files"
       }
-    ]
-  }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "extension.createMultiple",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Multi Folders Files Creator",
+      "properties": {
+        "multiFoldersFilesCreator.separator": {
+          "type": "string",
+          "default": ";",
+          "description": "Character used to separate multiple file/folder paths"
+        },
+        "multiFoldersFilesCreator.defaultTemplate": {
+          "type": "string",
+          "default": "",
+          "description": "Default content for new files without a specific template"
+        },
+        "multiFoldersFilesCreator.confirmLargeOperations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a confirmation dialog when creating many files/folders at once"
+        },
+        "multiFoldersFilesCreator.largeOperationThreshold": {
+          "type": "number",
+          "default": 5,
+          "description": "Number of files/folders that triggers the confirmation dialog"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -34,17 +76,20 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
-    "@types/vscode": "^1.100.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/vscode": "^1.100.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
-    "eslint": "^9.25.1",
-    "typescript": "^5.8.3",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.4.2",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
   }
 }
