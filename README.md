@@ -1,6 +1,6 @@
 # Multi Folders & Files Creator
 
-A Visual Studio Code extension that allows you to create multiple folders and files at once with a simple syntax.
+A Visual Studio Code extension that allows you to create multiple folders and files at once with an intuitive syntax using `folder: file1, file2` notation.
 
 ## Features
 
@@ -16,7 +16,7 @@ Right-click on any folder in the explorer and select "Create Multiple Folders or
 
 ![Context Menu](https://raw.githubusercontent.com/Kavindu-Wijesekara/multi-folders-files-creator/main/images/context-menu.png)
 
-Enter the paths separated by semicolons (or your custom separator):
+Enter the folder and file structure using the new syntax:
 
 ![Input Box](https://raw.githubusercontent.com/Kavindu-Wijesekara/multi-folders-files-creator/main/images/input-box.png)
 
@@ -28,27 +28,55 @@ All files and folders are created instantly:
 
 1. Right-click on a folder in the Explorer panel
 2. Select "Create Multiple Folders or Files" from the context menu
-3. Enter the paths you want to create, separated by semicolons (by default)
-   - End paths with `/` to create folders
-   - Paths without `/` at the end will create files
-   - Nested paths will automatically create parent directories
+3. Use the new intuitive syntax:
+   - `folder: file1, file2` - Creates a folder with multiple files inside
+   - `standalone.js` - Creates a standalone file
+   - Combine with semicolons: `src: index.ts, api: get.ts, post.ts; README.md`
 
 ### Examples
 
+**Create organized folder structure:**
 ```
-src/components/Button.js;src/components/Header.js;src/styles/main.css
+src: index.ts, api: get.ts, post.ts; README.md
 ```
-Creates three files: Button.js, Header.js, and main.css, with their respective parent directories.
+Creates:
+```
+src/
+├── index.ts
+└── api/
+    ├── get.ts
+    └── post.ts
+README.md
+```
 
+**Create multiple folders with files:**
 ```
-src/utils/;src/components/;src/assets/images/
+components: Button.js, Header.js; styles: main.css, theme.css; utils/
 ```
-Creates three folders: utils, components, and images (with its parent directory assets).
+Creates:
+```
+components/
+├── Button.js
+└── Header.js
+styles/
+├── main.css
+└── theme.css
+utils/
+```
 
+**Mix folders and standalone files:**
 ```
-models/User.js;models/Product.js;controllers/
+models: User.js, Product.js; controllers: auth.js; config.json
 ```
-Creates two files (User.js and Product.js) and one folder (controllers).
+Creates:
+```
+models/
+├── User.js
+└── Product.js
+controllers/
+└── auth.js
+config.json
+```
 
 ## Extension Settings
 
@@ -58,6 +86,8 @@ This extension contributes the following settings:
 * `multiFoldersFilesCreator.defaultTemplate`: Default content for new files without a specific template (default: empty)
 * `multiFoldersFilesCreator.confirmLargeOperations`: Show a confirmation dialog when creating many files/folders at once (default: `true`)
 * `multiFoldersFilesCreator.largeOperationThreshold`: Number of files/folders that triggers the confirmation dialog (default: `5`)
+* `multiFoldersFilesCreator.autoOpenFiles`: Automatically open created files in the editor (default: `false`)
+* `multiFoldersFilesCreator.useFileTemplates`: Use predefined templates for file types, disable to create empty files (default: `true`)
 
 ## Supported File Templates
 
