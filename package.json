@@ -2,7 +2,7 @@
   "name": "multi-folders-files-creator",
   "displayName": "Multi Folders & Files Creator",
   "description": "Create multiple folders and files at once with a simple syntax using 'folder: file1, file2' notation",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "mogo",
   "icon": "images/icon.png",
   "repository": {

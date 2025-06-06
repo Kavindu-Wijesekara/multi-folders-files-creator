@@ -108,6 +108,15 @@ The extension automatically adds templates for these file types:
 
 ## Release Notes
 
+### 0.1.0
+
+- **NEW: Preview Mode** - See exactly what will be created before confirming
+- **FIX: Nested folder parsing** - Properly handles syntax like `src: index.ts, api: get.ts, post.ts`
+- **FIX: Path normalization** - Removes double slashes in folder paths
+- **FIX: Progress tracking** - Accurate progress counter during creation
+- **IMPROVE: Java templates** - Uses actual filename for class names
+- New configuration option: `multiFoldersFilesCreator.showPreview`
+
 ### 0.0.1
 
 - Initial release
