@@ -25,7 +25,8 @@ function getConfiguration() {
 		confirmLargeOperations: config.get<boolean>('confirmLargeOperations', true),
 		largeOperationThreshold: config.get<number>('largeOperationThreshold', 5),
 		autoOpenFiles: config.get<boolean>('autoOpenFiles', false),
-		useFileTemplates: config.get<boolean>('useFileTemplates', true)
+		useFileTemplates: config.get<boolean>('useFileTemplates', true),
+		showPreview: config.get<boolean>('showPreview', true)
 	};
 }
 
@@ -144,6 +145,80 @@ function parseNestedContent(content: string, parentFolder: string): Array<{path:
 	return result;
 }
 
+// Generate a tree preview of what will be created
+function generatePreview(entries: Array<{path: string, isFolder: boolean}>): string {
+	// Build a tree structure
+	const tree: any = {};
+	
+	// First, collect all paths and build the tree structure
+	for (const entry of entries) {
+		const parts = entry.path.split('/');
+		let current = tree;
+		
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i];
+			if (!current[part]) {
+				current[part] = {
+					isFolder: i < parts.length - 1 || entry.isFolder,
+					children: {}
+				};
+			}
+			current = current[part].children;
+		}
+	}
+	
+	// Convert tree to preview lines
+	function buildPreview(node: any, depth: number = 0): string[] {
+		const lines: string[] = [];
+		const indent = '  '.repeat(depth);
+		
+		// Sort keys: folders first, then files
+		const sortedKeys = Object.keys(node).sort((a, b) => {
+			const aIsFolder = node[a].isFolder;
+			const bIsFolder = node[b].isFolder;
+			
+			if (aIsFolder && !bIsFolder) return -1;
+			if (!aIsFolder && bIsFolder) return 1;
+			return a.localeCompare(b);
+		});
+		
+		for (const key of sortedKeys) {
+			const item = node[key];
+			
+			if (item.isFolder) {
+				lines.push(`${indent}📁 ${key}/`);
+				// Add children with increased depth
+				lines.push(...buildPreview(item.children, depth + 1));
+			} else {
+				const icon = getFileIcon(key);
+				lines.push(`${indent}${icon} ${key}`);
+			}
+		}
+		
+		return lines;
+	}
+	
+	return buildPreview(tree).join('\n');
+}
+
+// Get appropriate icon for file type
+function getFileIcon(fileName: string): string {
+	const ext = path.extname(fileName).toLowerCase();
+	switch (ext) {
+		case '.ts': return '📘';
+		case '.js': return '📒';
+		case '.html': return '🌐';
+		case '.css': return '🎨';
+		case '.json': return '📋';
+		case '.md': return '📝';
+		case '.py': return '🐍';
+		case '.java': return '☕';
+		case '.c': case '.cpp': return '⚙️';
+		case '.png': case '.jpg': case '.jpeg': case '.gif': return '🖼️';
+		default: return '📄';
+	}
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('extension.createMultiple', async (uri: vscode.Uri) => {
 		const config = getConfiguration();
@@ -159,14 +234,58 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const entries = parseInput(input, config.separator);
 
-		// Confirm large operations
-		if (config.confirmLargeOperations && entries.length > config.largeOperationThreshold) {
-			const confirm = await vscode.window.showWarningMessage(
-				`You're about to create ${entries.length} files/folders. Do you want to continue?`,
-				'Yes', 'No'
+		// Show preview if enabled
+		if (config.showPreview) {
+			const preview = generatePreview(entries);
+			const previewMessage = `Preview of ${entries.length} files/folders to be created:\n\n${preview}`;
+			
+			const options = ['Create All', 'Cancel'];
+			if (config.confirmLargeOperations && entries.length > config.largeOperationThreshold) {
+				options.unshift('Show More Details');
+			}
+			
+			const choice = await vscode.window.showInformationMessage(
+				`Preview: ${entries.length} items will be created`,
+				{ modal: true, detail: previewMessage },
+				...options
 			);
-			if (confirm !== 'Yes') {
+
+			if (choice === 'Show More Details') {
+				// Show detailed preview in output channel
+				const outputChannel = vscode.window.createOutputChannel('Multi Folders Files Creator - Preview');
+				outputChannel.clear();
+				outputChannel.appendLine('='.repeat(50));
+				outputChannel.appendLine('PREVIEW: Files and Folders to be Created');
+				outputChannel.appendLine('='.repeat(50));
+				outputChannel.appendLine('');
+				outputChannel.appendLine(preview);
+				outputChannel.appendLine('');
+				outputChannel.appendLine('='.repeat(50));
+				outputChannel.appendLine(`Total: ${entries.length} items`);
+				outputChannel.appendLine('='.repeat(50));
+				outputChannel.show();
+
+				// Ask again after showing details
+				const finalChoice = await vscode.window.showInformationMessage(
+					`Create ${entries.length} files/folders?`,
+					'Create All', 'Cancel'
+				);
+				if (finalChoice !== 'Create All') {
+					return;
+				}
+			} else if (choice !== 'Create All') {
 				return;
+			}
+		} else {
+			// Just confirm large operations if preview is disabled
+			if (config.confirmLargeOperations && entries.length > config.largeOperationThreshold) {
+				const confirm = await vscode.window.showWarningMessage(
+					`You're about to create ${entries.length} files/folders. Do you want to continue?`,
+					'Yes', 'No'
+				);
+				if (confirm !== 'Yes') {
+					return;
+				}
 			}
 		}
 

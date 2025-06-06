@@ -5,6 +5,7 @@ A Visual Studio Code extension that allows you to create multiple folders and fi
 ## Features
 
 - Create multiple files and folders with a single command
+- **Preview mode** - See exactly what will be created before confirming
 - Automatically create parent directories if they don't exist
 - Use file templates based on file extensions
 - Customize the separator character and other settings
@@ -88,6 +89,7 @@ This extension contributes the following settings:
 * `multiFoldersFilesCreator.largeOperationThreshold`: Number of files/folders that triggers the confirmation dialog (default: `5`)
 * `multiFoldersFilesCreator.autoOpenFiles`: Automatically open created files in the editor (default: `false`)
 * `multiFoldersFilesCreator.useFileTemplates`: Use predefined templates for file types, disable to create empty files (default: `true`)
+* `multiFoldersFilesCreator.showPreview`: Show preview of files/folders before creating them (default: `true`)
 
 ## Supported File Templates
 
@@ -120,7 +122,6 @@ The extension automatically adds templates for these file types:
 - Ability to save and reuse common file structures
 - Command palette support
 - Support for workspace-specific templates
-- Preview mode to see what will be created before confirming
 
 ---
 

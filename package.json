@@ -76,6 +76,11 @@
           "type": "boolean",
           "default": true,
           "description": "Use predefined templates for file types (disable to create empty files)"
+        },
+        "multiFoldersFilesCreator.showPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show preview of files/folders before creating them"
         }
       }
     }
