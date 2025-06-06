@@ -41,7 +41,15 @@ function getFileContent(filePath: string): string {
 
 	// Use predefined templates if enabled
 	if (ext in fileTemplates) {
-		return fileTemplates[ext];
+		let template = fileTemplates[ext];
+		
+		// Special handling for Java files to use actual class name
+		if (ext === '.java') {
+			const fileName = path.basename(filePath, '.java');
+			template = `public class ${fileName} {\n\tpublic static void main(String[] args) {\n\t\t// TODO: Implement\n\t}\n}`;
+		}
+		
+		return template;
 	}
 
 	return config.defaultTemplate;
@@ -59,41 +67,77 @@ function parseInput(input: string, separator: string): Array<{path: string, isFo
 			const folderPart = segment.substring(0, colonIndex).trim();
 			const contentPart = segment.substring(colonIndex + 1).trim();
 			
-			// Add the main folder
-			result.push({path: folderPart + '/', isFolder: true});
+			// Add the main folder (remove extra slash)
+			result.push({path: folderPart, isFolder: true});
 			
-			// Parse the content after the colon
-			const items = contentPart.split(',').map(item => item.trim()).filter(item => item !== '');
-			
-			for (const item of items) {
-				if (item.includes(':')) {
-					// Nested folder like "api: get.ts, post.ts"
-					const nestedColonIndex = item.indexOf(':');
-					const nestedFolder = item.substring(0, nestedColonIndex).trim();
-					const nestedFiles = item.substring(nestedColonIndex + 1).trim();
-					
-					// Add the nested folder
-					result.push({path: folderPart + '/' + nestedFolder + '/', isFolder: true});
-					
-					// Add files in the nested folder
-					const filesInNested = nestedFiles.split(',').map(f => f.trim()).filter(f => f !== '');
-					for (const file of filesInNested) {
-						result.push({path: folderPart + '/' + nestedFolder + '/' + file, isFolder: false});
-					}
-				} else {
-					// Regular file in the main folder
-					const isFolder = item.endsWith('/');
-					if (isFolder) {
-						result.push({path: folderPart + '/' + item, isFolder: true});
-					} else {
-						result.push({path: folderPart + '/' + item, isFolder: false});
-					}
-				}
-			}
+			// Parse the content after the colon - need to handle nested syntax properly
+			const parsedContent = parseNestedContent(contentPart, folderPart);
+			result.push(...parsedContent);
 		} else {
 			// Handle standalone files or folders
 			const isFolder = segment.endsWith('/');
-			result.push({path: segment, isFolder});
+			const cleanPath = isFolder ? segment.slice(0, -1) : segment;
+			result.push({path: cleanPath, isFolder});
+		}
+	}
+	
+	return result;
+}
+
+// Helper function to parse nested content like "index.ts, api: get.ts, post.ts"
+function parseNestedContent(content: string, parentFolder: string): Array<{path: string, isFolder: boolean}> {
+	const result: Array<{path: string, isFolder: boolean}> = [];
+	
+	// Split by comma but be careful about nested colons
+	const items: string[] = [];
+	let current = '';
+	let depth = 0;
+	
+	for (let i = 0; i < content.length; i++) {
+		const char = content[i];
+		if (char === ':') {
+			depth++;
+		} else if (char === ',' && depth === 0) {
+			items.push(current.trim());
+			current = '';
+			continue;
+		} else if (char === ',' && depth > 0) {
+			// This comma belongs to nested content, keep collecting
+			depth = 0; // Reset after handling nested content
+		}
+		current += char;
+	}
+	
+	if (current.trim()) {
+		items.push(current.trim());
+	}
+	
+	// Now process each item
+	for (const item of items) {
+		if (item.includes(':')) {
+			// This is a nested folder like "api: get.ts, post.ts"
+			const nestedColonIndex = item.indexOf(':');
+			const nestedFolder = item.substring(0, nestedColonIndex).trim();
+			const nestedContent = item.substring(nestedColonIndex + 1).trim();
+			
+			// Add the nested folder
+			const nestedFolderPath = path.join(parentFolder, nestedFolder).replace(/\\/g, '/');
+			result.push({path: nestedFolderPath, isFolder: true});
+			
+			// Add files in the nested folder
+			const nestedFiles = nestedContent.split(',').map(f => f.trim()).filter(f => f !== '');
+			for (const file of nestedFiles) {
+				const isFolder = file.endsWith('/');
+				const cleanFileName = isFolder ? file.slice(0, -1) : file;
+				const filePath = path.join(parentFolder, nestedFolder, cleanFileName).replace(/\\/g, '/');
+				result.push({path: filePath, isFolder});
+			}
+		} else {
+			// Regular file or folder in the parent folder
+			const isFolder = item.endsWith('/');
+			const cleanName = isFolder ? item.slice(0, -1) : item;
+			const itemPath = path.join(parentFolder, cleanName).replace(/\\/g, '/');
+			result.push({path: itemPath, isFolder});
 		}
 	}
 	
@@ -161,8 +205,9 @@ export function activate(context: vscode.ExtensionContext) {
 					console.error(`Failed to create ${fullPath}:`, error);
 				}
 
-				// Update status bar
-				statusBar.text = `$(sync~spin) Creating files... (${results.success}/${entries.length})`;
+				// Update status bar with current progress
+				const completed = results.success + results.failed;
+				statusBar.text = `$(sync~spin) Creating files... (${completed}/${entries.length})`;
 			}
 		} finally {
 			statusBar.dispose();
