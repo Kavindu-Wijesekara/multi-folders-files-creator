@@ -43,13 +43,13 @@ function getFileContent(filePath: string): string {
 	// Use predefined templates if enabled
 	if (ext in fileTemplates) {
 		let template = fileTemplates[ext];
-		
+
 		// Special handling for Java files to use actual class name
 		if (ext === '.java') {
 			const fileName = path.basename(filePath, '.java');
 			template = `public class ${fileName} {\n\tpublic static void main(String[] args) {\n\t\t// TODO: Implement\n\t}\n}`;
 		}
-		
+
 		return template;
 	}
 
@@ -57,20 +57,20 @@ function getFileContent(filePath: string): string {
 }
 
 // Parse the new syntax: "folder: file1, file2; file3" and "src: index.ts, api: get.ts, post.ts"
-function parseInput(input: string, separator: string): Array<{path: string, isFolder: boolean}> {
-	const result: Array<{path: string, isFolder: boolean}> = [];
+function parseInput(input: string, separator: string): Array<{ path: string, isFolder: boolean }> {
+	const result: Array<{ path: string, isFolder: boolean }> = [];
 	const segments = input.split(separator).map(s => s.trim()).filter(s => s !== '');
-	
+
 	for (const segment of segments) {
 		if (segment.includes(':')) {
 			// Handle complex folder syntax like "src: index.ts, api: get.ts, post.ts"
 			const colonIndex = segment.indexOf(':');
 			const folderPart = segment.substring(0, colonIndex).trim();
 			const contentPart = segment.substring(colonIndex + 1).trim();
-			
+
 			// Add the main folder (remove extra slash)
-			result.push({path: folderPart, isFolder: true});
-			
+			result.push({ path: folderPart, isFolder: true });
+
 			// Parse the content after the colon - need to handle nested syntax properly
 			const parsedContent = parseNestedContent(contentPart, folderPart);
 			result.push(...parsedContent);
@@ -78,22 +78,22 @@ function parseInput(input: string, separator: string): Array<{path: string, isFo
 			// Handle standalone files or folders
 			const isFolder = segment.endsWith('/');
 			const cleanPath = isFolder ? segment.slice(0, -1) : segment;
-			result.push({path: cleanPath, isFolder});
+			result.push({ path: cleanPath, isFolder });
 		}
 	}
-	
+
 	return result;
 }
 
 // Helper function to parse nested content like "index.ts, api: get.ts, post.ts"
-function parseNestedContent(content: string, parentFolder: string): Array<{path: string, isFolder: boolean}> {
-	const result: Array<{path: string, isFolder: boolean}> = [];
-	
+function parseNestedContent(content: string, parentFolder: string): Array<{ path: string, isFolder: boolean }> {
+	const result: Array<{ path: string, isFolder: boolean }> = [];
+
 	// Split by comma but be careful about nested colons
 	const items: string[] = [];
 	let current = '';
 	let depth = 0;
-	
+
 	for (let i = 0; i < content.length; i++) {
 		const char = content[i];
 		if (char === ':') {
@@ -108,11 +108,11 @@ function parseNestedContent(content: string, parentFolder: string): Array<{path:
 		}
 		current += char;
 	}
-	
+
 	if (current.trim()) {
 		items.push(current.trim());
 	}
-	
+
 	// Now process each item
 	for (const item of items) {
 		if (item.includes(':')) {
@@ -120,41 +120,41 @@ function parseNestedContent(content: string, parentFolder: string): Array<{path:
 			const nestedColonIndex = item.indexOf(':');
 			const nestedFolder = item.substring(0, nestedColonIndex).trim();
 			const nestedContent = item.substring(nestedColonIndex + 1).trim();
-			
+
 			// Add the nested folder
 			const nestedFolderPath = path.join(parentFolder, nestedFolder).replace(/\\/g, '/');
-			result.push({path: nestedFolderPath, isFolder: true});
-			
+			result.push({ path: nestedFolderPath, isFolder: true });
+
 			// Add files in the nested folder
 			const nestedFiles = nestedContent.split(',').map(f => f.trim()).filter(f => f !== '');
 			for (const file of nestedFiles) {
 				const isFolder = file.endsWith('/');
 				const cleanFileName = isFolder ? file.slice(0, -1) : file;
 				const filePath = path.join(parentFolder, nestedFolder, cleanFileName).replace(/\\/g, '/');
-				result.push({path: filePath, isFolder});
+				result.push({ path: filePath, isFolder });
 			}
 		} else {
 			// Regular file or folder in the parent folder
 			const isFolder = item.endsWith('/');
 			const cleanName = isFolder ? item.slice(0, -1) : item;
 			const itemPath = path.join(parentFolder, cleanName).replace(/\\/g, '/');
-			result.push({path: itemPath, isFolder});
+			result.push({ path: itemPath, isFolder });
 		}
 	}
-	
+
 	return result;
 }
 
 // Generate a tree preview of what will be created
-function generatePreview(entries: Array<{path: string, isFolder: boolean}>): string {
+function generatePreview(entries: Array<{ path: string, isFolder: boolean }>): string {
 	// Build a tree structure
 	const tree: any = {};
-	
+
 	// First, collect all paths and build the tree structure
 	for (const entry of entries) {
 		const parts = entry.path.split('/');
 		let current = tree;
-		
+
 		for (let i = 0; i < parts.length; i++) {
 			const part = parts[i];
 			if (!current[part]) {
@@ -166,25 +166,25 @@ function generatePreview(entries: Array<{path: string, isFolder: boolean}>): str
 			current = current[part].children;
 		}
 	}
-	
+
 	// Convert tree to preview lines
 	function buildPreview(node: any, depth: number = 0): string[] {
 		const lines: string[] = [];
 		const indent = '  '.repeat(depth);
-		
+
 		// Sort keys: folders first, then files
 		const sortedKeys = Object.keys(node).sort((a, b) => {
 			const aIsFolder = node[a].isFolder;
 			const bIsFolder = node[b].isFolder;
-			
-			if (aIsFolder && !bIsFolder) return -1;
-			if (!aIsFolder && bIsFolder) return 1;
+
+			if (aIsFolder && !bIsFolder) { return -1; }
+			if (!aIsFolder && bIsFolder) { return 1; }
 			return a.localeCompare(b);
 		});
-		
+
 		for (const key of sortedKeys) {
 			const item = node[key];
-			
+
 			if (item.isFolder) {
 				lines.push(`${indent}📁 ${key}/`);
 				// Add children with increased depth
@@ -194,10 +194,10 @@ function generatePreview(entries: Array<{path: string, isFolder: boolean}>): str
 				lines.push(`${indent}${icon} ${key}`);
 			}
 		}
-		
+
 		return lines;
 	}
-	
+
 	return buildPreview(tree).join('\n');
 }
 
@@ -238,12 +238,12 @@ export function activate(context: vscode.ExtensionContext) {
 		if (config.showPreview) {
 			const preview = generatePreview(entries);
 			const previewMessage = `Preview of ${entries.length} files/folders to be created:\n\n${preview}`;
-			
+
 			const options = ['Create All', 'Cancel'];
 			if (config.confirmLargeOperations && entries.length > config.largeOperationThreshold) {
 				options.unshift('Show More Details');
 			}
-			
+
 			const choice = await vscode.window.showInformationMessage(
 				`Preview: ${entries.length} items will be created`,
 				{ modal: true, detail: previewMessage },

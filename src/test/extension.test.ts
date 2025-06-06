@@ -38,7 +38,7 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('publisher.multi-folders-files-creator'));
+		assert.ok(vscode.extensions.getExtension('mogo.multi-folders-files-creator'));
 	});
 
 	test('Configuration should have default values', () => {
@@ -47,6 +47,9 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(config.get('defaultTemplate'), '');
 		assert.strictEqual(config.get('confirmLargeOperations'), true);
 		assert.strictEqual(config.get('largeOperationThreshold'), 5);
+		assert.strictEqual(config.get('autoOpenFiles'), false);
+		assert.strictEqual(config.get('useFileTemplates'), true);
+		assert.strictEqual(config.get('showPreview'), true);
 	});
 
 	// Note: The following test is a placeholder for a real integration test
